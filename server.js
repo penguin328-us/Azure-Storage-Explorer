@@ -9,7 +9,6 @@ var server = http.createServer(router);
 
 router.use(express.static(path.resolve(__dirname, 'client')));
 
-
 server.listen(port, ip , function () {
     var addr = server.address();
     console.log("Web server listening at", addr.address + ":" + addr.port);

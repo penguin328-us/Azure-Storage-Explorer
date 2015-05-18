@@ -1,0 +1,8 @@
+﻿<!-- No Active Account -->
+<div class="alert alert-danger" ng-hide="currentAccount && currentAccount.name">
+    There is no active account, Please go to <a href="#/">Accounts</a> Page to Add Account or Set Active Account
+</div>
+
+<div ng-show ="currentAccount && currentAccount.name">
+    <div class="alert alert-info">Current Storage Account is <strong>{{currentAccount.name}}</strong></div>
+</div>

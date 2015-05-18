@@ -1,0 +1,29 @@
+﻿<div>
+    <div class="alert alert-info">Current Storage Account is <strong>{{currentAccount? currentAccount.name : "N/A"}}</strong></div>
+
+    <h3>List of Registered Storage Accounts</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Keys</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="sa in accounts">
+                <td>{{sa.name}}</td>
+                <td>******</td>
+                <td>
+                    <button class="btn btn-primary" ng-click="setCurrentAccount(sa.name)">SetAsCurrentAccount</button>
+                    <button class="btn btn-danger" ng-click="removeStorageAccount(sa.name)">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="text" class="form-control" ng-model="newAccountName" required /></td>
+                <td><input type="text" class="form-control" ng-model="newAccountKey" required /></td>
+                <td><button class="btn btn-primary" ng-click="addNewAccount()">Add Storage Account</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
