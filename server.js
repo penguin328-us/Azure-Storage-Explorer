@@ -1,5 +1,5 @@
 ﻿var http = require('http');
-var port = process.env.port || 1337;
+var port = process.env.PORT || 1337;
 var ip = process.env.IP || "0.0.0.0";
 
 var express = require('express');
