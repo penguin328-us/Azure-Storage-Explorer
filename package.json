@@ -1,0 +1,13 @@
+{
+  "name": "AzureStorageExplorer",
+  "version": "0.0.0",
+  "description": "Microsoft Azure Storage Explorer",
+  "main": "server.js",
+  "author": {
+    "name": "Penguin",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "^4.12.4"
+  }
+}
