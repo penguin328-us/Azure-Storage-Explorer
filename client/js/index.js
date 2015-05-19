@@ -48,6 +48,19 @@
             }
         }
     }])
-    .controller('TableController', ['accountMgmt', '$scope', function (accountMgmt, $scope) {
+    .controller('TableController', ['accountMgmt', '$scope', '$http',  function (accountMgmt, $scope, $http) {
         $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
+        $scope.tables = [];
+        $scope.currentTable = "";
+        
+        if ($scope.currentAccount && $scope.currentAccount.name) {
+            $http.get('/table/list', {
+                headers: {
+                    'x-storage-account-name': $scope.currentAccount.name,
+                    'x-storage-account-key': $scope.currentAccount.key
+                }
+            })
+            .success(function (data, status) { $scope.tables = data; if(data && data.length>0) $scope.currentTable = data[0]; })
+            .error(function (data, status) { console.log(data); });
+        }
     }])

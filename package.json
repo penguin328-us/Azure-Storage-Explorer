@@ -8,6 +8,7 @@
     "email": ""
   },
   "dependencies": {
+    "azure-storage": "^0.4.4",
     "express": "^4.12.4"
   }
 }

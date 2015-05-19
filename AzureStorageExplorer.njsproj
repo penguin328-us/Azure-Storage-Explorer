@@ -32,7 +32,9 @@
   <ItemGroup>
     <Compile Include="client\js\index.js" />
     <Compile Include="client\js\storageaccount.js" />
+    <Compile Include="common.js" />
     <Compile Include="server.js" />
+    <Compile Include="table.js" />
     <Content Include="client\account.html" />
     <Content Include="client\index.html" />
     <Content Include="client\table.html" />

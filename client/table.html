@@ -3,6 +3,20 @@
     There is no active account, Please go to <a href="#/">Accounts</a> Page to Add Account or Set Active Account
 </div>
 
-<div ng-show ="currentAccount && currentAccount.name">
-    <div class="alert alert-info">Current Storage Account is <strong>{{currentAccount.name}}</strong></div>
+<div ng-show="currentAccount && currentAccount.name">
+    <div class="alert alert-info">
+        <div class="row">
+            <div class="col-md-6">Current Storage Account is <strong>{{currentAccount.name}}</strong></div>
+            <div class="col-md-6">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label>Tables</label>
+                        <select class="form-control" ng-model="currentTable">
+                            <option ng-repeat="t in tables">{{t}}</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>      
+    </div>
 </div>

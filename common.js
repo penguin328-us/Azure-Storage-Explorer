@@ -1,0 +1,19 @@
+﻿var azure = require('azure-storage');
+
+exports.getTableService = function (req) {
+    var sa = getStorageAccount(req);
+    return azure.createTableService(sa.name, sa.key);
+};
+
+
+function getStorageAccount(req) {
+    var name = req.get('x-storage-account-name');
+    var key = req.get('x-storage-account-key')
+    if (name && key) {
+        return {
+            name: name,
+            key: key,
+        }
+    }
+    throw "no storage associated";
+}
