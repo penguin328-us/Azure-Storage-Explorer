@@ -36,6 +36,8 @@
     <Compile Include="server.js" />
     <Compile Include="table.js" />
     <Content Include="client\account.html" />
+    <Content Include="client\css\site.css" />
+    <Content Include="client\image\loading.gif" />
     <Content Include="client\index.html" />
     <Content Include="client\table.html" />
     <Content Include="package.json" />
@@ -44,6 +46,8 @@
   <ItemGroup>
     <Folder Include="client\" />
     <Folder Include="client\js\" />
+    <Folder Include="client\image\" />
+    <Folder Include="client\css\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

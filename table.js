@@ -25,8 +25,18 @@ module.exports = function (app) {
                 res.status(500).send(error);
             }
             else {
-                console.log(result);
-                res.send(result.entries);
+                console.log(result.entries);
+                var entries = [];
+                if (result.entries) {
+                    for (var i = 0; i < result.entries.length; i++) {
+                        var entry = {};
+                        for (var name in result.entries[i]) {
+                            entry[name] = result.entries[i][name]._;
+                        }
+                        entries.push(entry);
+                    }
+                }
+                res.send(entries);
             }
         });
     });
