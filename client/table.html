@@ -8,15 +8,32 @@
         <div class="row">
             <div class="col-md-6">Current Storage Account is <strong>{{currentAccount.name}}</strong></div>
             <div class="col-md-6">
-                <form class="form-inline">
+                <form class="form-inline" ng-show="tables && tables.length > 0">
                     <div class="form-group">
                         <label>Tables</label>
-                        <select class="form-control" ng-model="currentTable">
+                        <select class="form-control" ng-model="currentTable" ng-change="tableChange()">
                             <option ng-repeat="t in tables">{{t}}</option>
                         </select>
                     </div>
                 </form>
+                <label class="text-danger" ng-hide="tables && tables.length > 0">No Table in This Storage</label>
             </div>
         </div>      
     </div>
+    <h3>List of Entities</h3>
+    <table class="table" ng-show="entities && entities.length > 0">
+        <thead>
+            <tr>
+                <th ng-repeat="schema in tableSchema">{{schema}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="entity in entities">
+                <td ng-repeat="schema in tableSchema">
+                    {{entity[schema]}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="alert alert-info" ng-hide="entities && entities.length > 0">No Entities in Current Table</div>
 </div>

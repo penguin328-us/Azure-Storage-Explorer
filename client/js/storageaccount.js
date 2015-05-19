@@ -1,6 +1,5 @@
-﻿angular.module('azureStorageMgmt', ['ngCookies'])
+angular.module('azureStorageMgmt', ['ngCookies'])
     .factory('accountMgmt', ['$cookies', function ($cookies) {
-        
         var accountsKey = "AzureAccounts";
         var activeAccountKey = "ActiveAzureAccount";
 
@@ -73,6 +72,25 @@
 
             getCurrentStorageAccount: function () {
                 return loadFromLocal(activeAccountKey);
+            }
+        }
+    }])
+    .factory('tableMgmt', ['$http', function($http){
+        function callTableService(sa, url){
+            return $http.get(url, {
+                headers: {
+                    'x-storage-account-name': sa.name,
+                    'x-storage-account-key': sa.key
+                }
+            });
+        }
+        return {
+            listTables:function(sa){
+                return callTableService(sa,'/table/list');
+            },
+            
+            getEntities:function(sa,table){
+                return callTableService(sa,'/table/listentities/' + table);
             }
         }
     }])

@@ -48,19 +48,35 @@
             }
         }
     }])
-    .controller('TableController', ['accountMgmt', '$scope', '$http',  function (accountMgmt, $scope, $http) {
+    .controller('TableController', ['accountMgmt', 'tableMgmt', '$scope',  function (accountMgmt, tableMgmt, $scope) {
         $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
         $scope.tables = [];
         $scope.currentTable = "";
+        $scope.entities = [];
+        $scope.tableSchema = [];
         
-        if ($scope.currentAccount && $scope.currentAccount.name) {
-            $http.get('/table/list', {
-                headers: {
-                    'x-storage-account-name': $scope.currentAccount.name,
-                    'x-storage-account-key': $scope.currentAccount.key
+        $scope.tableChange = function(){
+            tableMgmt.getEntities($scope.currentAccount,$scope.currentTable)
+            .success(function(data,status){
+                $scope.entities = data;
+                if(data && data.length >0){
+                    $scope.tableSchema = [];
+                    for(var name in data[0]){
+                        $scope.tableSchema.push(name);
+                    }
                 }
             })
-            .success(function (data, status) { $scope.tables = data; if(data && data.length>0) $scope.currentTable = data[0]; })
+            .error(function(data,status){console.log(data);})
+        }
+        
+        if ($scope.currentAccount && $scope.currentAccount.name) {
+            tableMgmt.listTables($scope.currentAccount)
+            .success(function (data, status) { 
+                $scope.tables = data; 
+                if(data && data.length>0) {
+                $scope.currentTable = data[0]; 
+                $scope.tableChange();
+                }})
             .error(function (data, status) { console.log(data); });
         }
     }])
