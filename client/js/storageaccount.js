@@ -2,6 +2,7 @@ angular.module('azureStorageMgmt', ['ngCookies'])
     .factory('accountMgmt', ['$cookies', function ($cookies) {
         var accountsKey = "AzureAccounts";
         var activeAccountKey = "ActiveAzureAccount";
+        var tableContextKey = "TableContext"
 
         var saveToLocal = function (key, value) {
             if (typeof (Storage) !== "undefined") {
@@ -72,6 +73,13 @@ angular.module('azureStorageMgmt', ['ngCookies'])
 
             getCurrentStorageAccount: function () {
                 return loadFromLocal(activeAccountKey);
+            },
+            
+            saveTableContext:function(ctx){
+                saveToLocal(tableContextKey, ctx);
+            },
+            getTableContext:function(){
+                return loadFromLocal(tableContextKey);
             }
         }
     }])

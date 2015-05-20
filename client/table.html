@@ -27,21 +27,33 @@
 
     <div class="loading" style="min-height:100px" ng-show="entitiesLoading"></div>
     <div ng-hide="entitiesLoading">
-        <div ng-show="entities && entities.length > 0">
-            <div>
-                <button id="table-column-filter" type="button" class="btn btn-default" data-container="body" data-toggle="popover" data-placement="bottom">
-                    Column Filter
-                </button>
+        <div ng-show="entities && entities.length > 0" id="table-entries">
+            <div class="row">
+                <div class="col-sm-6">
+                   <div class="input-group">
+                      <input type="text" class="form-control" placeholder="Search...">
+                      <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">Go!</button>
+                      </span>
+                    </div><!-- /input-group -->
+                </div>
+                <div class="col-sm-6">
+                    <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
+                        Column Filter
+                    </button>
+                </div>
+                
             </div>
+            <hr />
             <table class="resizeTable table table-condensed">
                 <thead>
                     <tr>
-                        <th ng-repeat="schema in tableSchema">{{schema}}</th>
+                        <th ng-repeat="col in selectedTableCols">{{col}}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="entity in entities">
-                        <td ng-repeat="schema in tableSchema">{{entity[schema]}}
+                        <td ng-repeat="col in selectedTableCols">{{entity[col]}}
                         </td>
                     </tr>
                 </tbody>

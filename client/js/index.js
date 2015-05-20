@@ -48,7 +48,7 @@
             }
         }
     }])
-    .controller('TableController', ['accountMgmt', 'tableMgmt', '$scope',  function (accountMgmt, tableMgmt, $scope) {
+    .controller('TableController', ['accountMgmt', 'tableMgmt', '$scope', '$compile', function (accountMgmt, tableMgmt, $scope, $compile) {
         $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
         $scope.tableLoading = false;
         $scope.tables = [];
@@ -56,49 +56,69 @@
         
         $scope.entitiesLoading = false;
         $scope.entities = [];
-        $scope.tableSchema = [];
-        var table = null;
+        $scope.selectedTableCols = [];
+        $scope.tableQuery = "";
+        
+        var tableColFilterContent = "";
 
-        $scope.tableChange = function (){
+        function loadEntries(isTableChanged){
             $scope.entitiesLoading = true;
             tableMgmt.getEntities($scope.currentAccount, $scope.currentTable)
             .success(function (data, status) {
                 $scope.entities = data;
-                if (data && data.length > 0 && $scope.tableSchema.length == 0) {
-                    $scope.tableSchema = [];
+                if (data && data.length > 0 && isTableChanged) {
+                    $scope.selectedTableCols = [];
                     for (var name in data[0]) {
-                        $scope.tableSchema.push(name);
+                        $scope.selectedTableCols.push(name);
                     }
-                    $("#table-column-filter").popover({
-                        html: true,
-                        content: function () {
-                            var result = '<ul>'
-                            for (var i = 0; i < $scope.tableSchema.length; i++) {
-                                result = result + '<li>' + $scope.tableSchema[i] + '</li>';
-                            }
-                            return result + '</ul>';
-                        }
-                    });
+                    initColumnFilterPopup($scope.selectedTableCols);
+                    accountMgmt.saveTableContext({
+                        table:$scope.currentTable,
+                        cols:$scope.selectedTableCols,
+                        selectedCols:$scope.selectedTableCols,
+                    })
                 }
-                //if (table) {
-                //    table.destroy();
-                //}
-                //table = new Handsontable($("#table-entries")[0], {
-                //    data: $scope.entities,
-                //    colHeaders: $scope.tableSchema,
-                //    manualColumnResize: true,
-                //    height: 800,
-                //    readOnly: true,
-                //    allowInsertColumn: false,
-                //    allowInsertRow: false,
-                //    colWidths: 120,
-                //    wordWrap: true,
-                //    allowRemoveColumn: true,
-                //    //contextMenu: ['remove_col', 'col_left', 'col_right']
-                //});
             })
             .error(function (data, status) { console.log(data); })
             .finally(function () { $scope.entitiesLoading = false;});
+        }
+        
+        function initColumnFilterPopup(cols){
+            var content = '<form>';
+                    for (var i = 0; i < cols.length; i++) {
+                        content = content + '<div class="checkbox"><label><input ' + ($scope.selectedTableCols.indexOf(cols[i])>=0?'checked':'') + ' type="checkbox" value="' + cols[i] + '">' + cols[i] + '</label></div>';
+                    }
+                    content =content + '<button class="btn btn-primary" ng-click="setFilter($event)"> OK </button>  <button class="btn btn-default" onclick="$(\'#table-column-filter\').popover(\'hide\');">Cancel</button></form>';
+                    tableColFilterContent = $compile(content)($scope);
+                    
+                    $("#table-column-filter").popover({
+                        html: true,
+                        content: function() {
+                            return tableColFilterContent;
+                        },
+                        container:'#table-entries'
+                    });
+        }
+            
+        $scope.tableChange = function (){
+           loadEntries(true);
+        }
+        
+        $scope.setFilter = function($event){
+            var cols = []
+            $($event.target).parent().find("input:checked").each(function(){cols.push($(this).val());});
+            if(cols.length>0){
+                var ctx = accountMgmt.getTableContext();
+                if(ctx){
+                    ctx.selectedCols = cols;
+                    accountMgmt.saveTableContext(ctx);
+                }
+                $scope.selectedTableCols = cols;
+                $("#table-column-filter").popover('hide');
+            }
+            else{
+                alert("Please Select At least on column");
+            }
         }
         
         if ($scope.currentAccount && $scope.currentAccount.name) {
@@ -107,11 +127,32 @@
             .success(function (data, status) { 
                 $scope.tables = data; 
                 if(data && data.length>0) {
+                    var ctx = accountMgmt.getTableContext();
                     $scope.currentTable = data[0];
-                    $scope.tableSchema = [];
-                    $scope.tableChange();
+                    applyContext(ctx);
                 }})
             .error(function (data, status) { console.log(data); })
             .finally(function () { $scope.tableLoading = false; });
+        }
+        
+        function applyContext(ctx){
+            var isTableChanged = true;
+            if(ctx && ctx.table){
+                $scope.currentTable = ctx.table;
+                if(ctx.cols && ctx.cols.length > 0){
+                    isTableChanged = false;
+                    if(ctx.selectedCols && ctx.selectedCols.length >0){
+                        $scope.selectedTableCols = ctx.selectedCols;
+                    }
+                    else{
+                        $scope.selectedTableCols = ctx.cols;
+                    }
+                    initColumnFilterPopup(ctx.cols);
+                    if(ctx.query){
+                        $scope.tableQuery = ctx.query;
+                    }
+                }
+            }
+            loadEntries(isTableChanged);
         }
     }])
