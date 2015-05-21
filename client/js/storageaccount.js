@@ -102,3 +102,16 @@ angular.module('azureStorageMgmt', ['ngCookies'])
             }
         }
     }])
+    .factory('blobMgmt', ['$http', function($http){
+        return {
+            listItem:function(sa,path){
+                return $http.get('/blob/list', {
+                headers: {
+                    'x-storage-account-name': sa.name,
+                    'x-storage-account-key': sa.key
+                },
+                params:{path,path}
+            });
+            }
+        }
+    }])

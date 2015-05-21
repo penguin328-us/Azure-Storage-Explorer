@@ -1,5 +1,6 @@
-﻿var http = require('http');
+var http = require('http');
 var table = require('./table.js');
+var blob = require('./blob.js');
 var port = process.env.PORT || 1337;
 var ip = process.env.IP || "0.0.0.0";
 
@@ -10,6 +11,7 @@ var server = http.createServer(app);
 
 app.use(express.static(path.resolve(__dirname, 'client')));
 table(app);
+blob(app);
 
 server.listen(port, ip , function () {
     var addr = server.address();

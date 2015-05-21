@@ -9,6 +9,10 @@
                 controller: 'TableController',
                 templateUrl: 'table.html'
             })
+            .when('/blob',  {
+                controller: 'BlobController',
+                templateUrl:'blob.html'
+            })
             .otherwise({
                 redirectTo: '/'
             });
@@ -155,4 +159,54 @@
             }
             loadEntries(isTableChanged);
         }
+    }])
+    .controller('BlobController', ['accountMgmt', 'blobMgmt', '$scope', '$compile', function (accountMgmt, blobMgmt, $scope, $compile) {
+        $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
+        $scope.path = '/';
+        $scope.pathList = [];
+        $scope.items = [];
+        $scope.itemsLoading = true;
+        
+        function load(){
+            updatePathList();
+            blobMgmt.listItem($scope.currentAccount, $scope.path)
+            .success(function (data, status) { 
+                $scope.items = data; 
+            })
+            .error(function (data, status) { console.log(data); })
+            .finally(function () { $scope.itemsLoading = false; });
+        }
+        
+        function updatePathList(){
+            var list = $scope.path.split('/');
+            var path = "/";
+            $scope.pathList = [];
+            for(var i=0;i<list.length;i++){
+                if(list[i]){
+                    path = path + list[i] + '/';
+                    $scope.pathList.push({
+                        name:list[i],
+                        path:path
+                    })
+                }
+            }
+        }
+        
+        load();
+        
+        $scope.openItem = function(item){
+            if(item.type == 0){
+                $scope.path = $scope.path + item.shortName + '/';
+                load();
+            }
+            else{
+                alert('open file');
+            }
+        }
+        
+        $scope.openFolder = function(path){
+            $scope.path = path;
+            load();
+        }
+        
     }])

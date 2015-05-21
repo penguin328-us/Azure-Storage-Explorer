@@ -1,0 +1,44 @@
+<div class="alert alert-danger" ng-hide="currentAccount && currentAccount.name">
+    There is no active account, Please go to <a href="#/">Accounts</a> Page to Add Account or Set Active Account
+</div>
+
+<div ng-show="currentAccount && currentAccount.name">
+    <div class="alert alert-info">Current Storage Account is <strong>{{currentAccount.name}}</strong></div>
+    
+    <div>
+        <ol class="breadcrumb">
+          <li><a href="javascript:void(0)" ng-click="openFolder('/')">{{currentAccount.name}}</a></li>
+          <li ng-repeat="path in pathList">
+              <a href="javascript:void(0)" ng-click="openFolder(path.path)">{{path.name}}</a>
+          </li>
+        </ol>
+    </div>
+
+    <div class="loading" style="min-height:100px" ng-show="itemsLoading"></div>
+    <div ng-hide="itemsLoading">
+        <div ng-show="items && items.length > 0">
+            <div class="row">
+                <div class="col-sm-6">
+                    <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
+                        New Folder
+                    </button>
+                </div>
+                
+            </div>
+            <hr />
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in items">
+                        <td ng-dblclick="openItem(item)">{{item.name}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-info" ng-hide="items && items.length > 0">No items in Current Folder</div>
+    </div>
+</div>
