@@ -203,8 +203,10 @@
             }
             load();
         }
-        
-        applyContext();
+
+        if ($scope.currentAccount && $scope.currentAccount.name) {
+            applyContext();
+        }
 
         $scope.openItem = function(item){
             if(item.type == 0){
