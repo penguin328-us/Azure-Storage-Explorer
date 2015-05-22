@@ -5,11 +5,13 @@ var port = process.env.PORT || 1337;
 var ip = process.env.IP || "0.0.0.0";
 
 var express = require('express');
+var cookieParser = require('cookie-parser');
 var path = require('path');
 var app  = express();
 var server = http.createServer(app);
 
 app.use(express.static(path.resolve(__dirname, 'client')));
+app.use(cookieParser());
 table(app);
 blob(app);
 

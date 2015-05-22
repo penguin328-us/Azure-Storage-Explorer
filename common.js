@@ -11,8 +11,11 @@ exports.getBlobService = function(req){
 }
 
 function getStorageAccount(req) {
-    var name = req.get('x-storage-account-name');
-    var key = req.get('x-storage-account-key')
+    //var name = req.get('x-storage-account-name');
+    //var key = req.get('x-storage-account-key')
+    var name = req.cookies.accountName;
+    var key = req.cookies.accountKey;
+
     if (name && key) {
         return {
             name: name,
