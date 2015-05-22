@@ -30,13 +30,21 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="blob.js" />
     <Compile Include="client\js\index.js" />
     <Compile Include="client\js\storageaccount.js" />
     <Compile Include="common.js" />
     <Compile Include="server.js" />
     <Compile Include="table.js" />
     <Content Include="client\account.html" />
+    <Content Include="client\blob.html" />
     <Content Include="client\css\site.css" />
+    <Content Include="client\image\fileIcons\file.png" />
+    <Content Include="client\image\fileIcons\folder.png" />
+    <Content Include="client\image\fileIcons\image.png" />
+    <Content Include="client\image\fileIcons\json.JPG" />
+    <Content Include="client\image\fileIcons\txt.jpg" />
+    <Content Include="client\image\fileIcons\xml.jpg" />
     <Content Include="client\image\loading.gif" />
     <Content Include="client\index.html" />
     <Content Include="client\table.html" />
@@ -45,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="client\" />
+    <Folder Include="client\image\fileIcons\" />
     <Folder Include="client\js\" />
     <Folder Include="client\image\" />
     <Folder Include="client\css\" />

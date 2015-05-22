@@ -1,14 +1,15 @@
 angular.module('azureStorageMgmt', ['ngCookies'])
-    .factory('accountMgmt', ['$cookies', function ($cookies) {
+    .factory('accountMgmt', ['$cookieStore', '$cookies', function ($cookieStore, $cookies) {
         var accountsKey = "AzureAccounts";
         var activeAccountKey = "ActiveAzureAccount";
-        var tableContextKey = "TableContext"
+        var tableContextKey = "TableContext";
+        var blobContextKey = "BlobContext";
 
         var saveToLocal = function (key, value) {
             if (typeof (Storage) !== "undefined") {
                 localStorage.setItem(key, angular.toJson(value));
             } else {
-                $cookie.putObject(key, value);
+                $cookieStore.put(key, value);
             }
         };
 
@@ -21,9 +22,23 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                     return null;
                 }
             } else {
-                $cookie.getObject(key);
+                $cookieStore.get(key);
             }
         };
+        
+        var setCurrentAccountForServer = function () {
+            var account = loadFromLocal(activeAccountKey);
+            if (account && account.name && account.key) {
+                $cookies.accountName = account.name;
+                $cookies.accountKey = account.key;
+            }
+            else {
+                $cookieStore.remove('accountName');
+                $cookieStore.remove('accountKey');
+            }
+        };
+        
+        setCurrentAccountForServer();
 
         return {
             addStorageAccount: function (name, key) {
@@ -65,10 +80,12 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                 for (var i = 0; i < accounts.length; i++) {
                     if (accounts[i].name == name) {
                         saveToLocal(activeAccountKey, accounts[i]);
+                        setCurrentAccountForServer();
                         return accounts[i];
                     }
                 }
                 saveToLocal(activeAccountKey, null);
+                setCurrentAccountForServer();
             },
 
             getCurrentStorageAccount: function () {
@@ -78,8 +95,17 @@ angular.module('azureStorageMgmt', ['ngCookies'])
             saveTableContext:function(ctx){
                 saveToLocal(tableContextKey, ctx);
             },
+
             getTableContext:function(){
                 return loadFromLocal(tableContextKey);
+            },
+
+            saveBlobContext: function (ctx) {
+                saveToLocal(blobContextKey, ctx);
+            },
+            
+            getBlobContext: function () {
+                return loadFromLocal(blobContextKey);
             }
         }
     }])
@@ -110,7 +136,7 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                     'x-storage-account-name': sa.name,
                     'x-storage-account-key': sa.key
                 },
-                params:{path,path}
+                params:{path : path}
             });
             }
         }

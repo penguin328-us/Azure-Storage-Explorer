@@ -169,6 +169,10 @@
         
         function load(){
             updatePathList();
+            $scope.itemsLoading = true;
+            accountMgmt.saveBlobContext({
+                path: $scope.path
+            });
             blobMgmt.listItem($scope.currentAccount, $scope.path)
             .success(function (data, status) { 
                 $scope.items = data; 
@@ -192,15 +196,23 @@
             }
         }
         
-        load();
+        function applyContext() {
+            var ctx = accountMgmt.getBlobContext();
+            if (ctx && ctx.path) {
+                $scope.path = ctx.path;
+            }
+            load();
+        }
         
+        applyContext();
+
         $scope.openItem = function(item){
             if(item.type == 0){
                 $scope.path = $scope.path + item.shortName + '/';
                 load();
             }
             else{
-                alert('open file');
+                window.open('/blob/file' + $scope.path + item.shortName )
             }
         }
         
@@ -209,4 +221,38 @@
             load();
         }
         
+        $scope.getSize = function (item) {
+            if (item.type == 1) {
+                return (item.properties['content-length']/1024).toFixed(2) + ' KB'
+            }
+            return "";
+        },
+
+        $scope.getIcon = function (item) {
+            if (item.type == 0) {
+                return '/image/fileIcons/folder.png';
+            }
+            else {
+                var extension = '';
+                var index = item.shortName.lastIndexOf('.');
+                if (index > 0) {
+                    extension = item.shortName.substr(index + 1);
+                }
+                switch (extension.toLowerCase()) {
+                    case "xml":
+                        return '/image/fileIcons/xml.jpg';
+                    case "json":
+                        return '/image/fileIcons/json.jpg';
+                    case "txt":
+                    case "log":
+                        return '/image/fileIcons/txt.jpg';
+                    case "png":
+                    case "jpg":
+                    case "bmp":
+                        return '/image/fileIcons/image.png'
+                    default:
+                        return '/image/fileIcons/file.png';
+                }
+            }
+        }
     }])
