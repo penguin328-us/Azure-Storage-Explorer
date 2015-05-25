@@ -35,7 +35,7 @@ blob(app);
 if(httpsOptions){
     var https = require("https");
     
-    var httpsServer = https.https.createServer(httpsOptions,app);
+    var httpsServer = https.createServer(httpsOptions,app);
     httpsServer.listen(httpsPort, ip, function(){
         var addr = server.address();
         console.log("Https server listening at", addr.address + ":" + addr.port);
