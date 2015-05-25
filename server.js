@@ -38,7 +38,7 @@ if(httpsOptions){
     var httpsServer = https.createServer(httpsOptions,app);
     httpsServer.listen(httpsPort, ip, function(){
         var addr = server.address();
-        console.log("Https server listening at", addr.address + ":" + addr.port);
+        console.log("Https server listening at", addr.address + ":" + httpsPort);
     });
     
     server = http.createServer(function(req,res){
