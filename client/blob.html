@@ -16,12 +16,14 @@
 
     <div class="loading" style="min-height:100px" ng-show="itemsLoading"></div>
     <div ng-hide="itemsLoading">
-        <div ng-show="items && items.length > 0">
+        <div>
             <div class="row">
                 <div class="col-sm-6">
-                    <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
+                    <button class="btn btn-primary">
                         New Folder
                     </button>
+                    <button class="btn btn-primary" onclick="$(this).next().click()">Upload Files...</button>
+                    <input type="file" multiple style="display:none" file-selected="fileSelected(files)"/>
                 </div>
                 
             </div>
@@ -36,6 +38,23 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr ng-repeat="upload in uploadingList">
+                        <td><img style="max-height:25px; max-width:25px" src="{{getIcon(upload)}}" /></td>
+                        <td>
+                            {{upload.shortName}}
+                            <!---->
+                            <label ng-hide="upload.status == 'inProgress'" ng-class="{label:1, 'label-success':upload.status =='succeed', 'label-danger':upload.status =='failed', 'label-default':upload.status =='pending'}">
+                                {{upload.status}} upload
+                            </label>
+                            <div class="progress" ng-show="upload.status =='inProgress'">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{upload.uploadPercentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{upload.uploadPercentage}}%">
+                                    <span class="sr-only">{{upload.uploadPercentage}}% Complete</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>N/A</td>
+                        <td>{{getSize(upload)}}</td>
+                    </tr>
                     <tr ng-repeat="item in items">
                         <td><img style="max-height:25px; max-width:25px" src="{{getIcon(item)}}" /></td>
                         <td ng-click="openItem(item)"><a href="javascript:void(0)">{{item.shortName}}</a></td>

@@ -16,7 +16,24 @@
             .otherwise({
                 redirectTo: '/'
             });
-    })
+})
+    .directive('fileSelected', [function () {
+        return {
+            restrict: 'A',
+            scope: {
+                callBack: '&fileSelected'
+            },
+            link: function (scope, elem, attr) {
+                var func = attr.fileSelected
+                if (func) {
+                    elem.on("change", function (e) {
+                        var files = e.target.files
+                        scope.callBack({ files: files });
+                    });
+                }
+            }
+        }
+    }])
     .controller('AccountsController', ['accountMgmt', '$scope', function (accountMgmt, $scope) {
         $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
         $scope.accounts = accountMgmt.getStorageAccounts();
@@ -160,12 +177,13 @@
             loadEntries(isTableChanged);
         }
     }])
-    .controller('BlobController', ['accountMgmt', 'blobMgmt', '$scope', '$compile', function (accountMgmt, blobMgmt, $scope, $compile) {
+    .controller('BlobController', ['accountMgmt', 'blobMgmt', 'fileUploads', '$scope', '$compile', function (accountMgmt, blobMgmt, fileUploads, $scope, $compile) {
         $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
         $scope.path = '/';
         $scope.pathList = [];
         $scope.items = [];
         $scope.itemsLoading = true;
+        $scope.uploadingList = [];
         
         function load(){
             updatePathList();
@@ -254,6 +272,45 @@
                         return '/image/fileIcons/image.png'
                     default:
                         return '/image/fileIcons/file.png';
+                }
+            }
+        }
+        
+        function isItemExists(name) {
+            for (var i = 0; i < $scope.items.length; i++) {
+                if ($scope.items[i].shortName.toLowerCase() === name.toLowerCase()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function uploadFile(file) {
+            var job = fileUploads.addUploadJob('/blob/upload', $scope.path + file.name, file);
+            
+            job.onProgress = function () { 
+                $scope.$apply();
+            }
+            job.onCompleted = function () {
+                $scope.$apply();
+            }
+            
+            job.shortName = file.name;
+            job.properties = {};
+            job.properties['content-length'] = file.size;
+            job.type = 1;
+            $scope.uploadingList.push(job);
+        }
+
+        $scope.fileSelected = function (files) {
+            for (var i = 0; i < files.length; i++) {
+                if (isItemExists(files[i].name)) {
+                    if (confirm(files[i].name + " already exists, do you want to override this item")) {
+                        uploadFile(files[i]);
+                    }
+                }
+                else {
+                    uploadFile(files[i]);
                 }
             }
         }

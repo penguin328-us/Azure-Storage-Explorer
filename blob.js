@@ -12,13 +12,7 @@ module.exports = function (app) {
     app.get('/blob/list', function (req, res) {
         var blobsvc = common.getBlobService(req);
         var path = req.query.path || '/';
-        var index = path.indexOf('/',1);
-        var container = null;
-        var directory = null;
-        if(index > 0){
-            container = path.substring(1,index);
-            directory = path.substring(index+1);
-        }
+        var blob = parseBlobPath(path);
         
         var blobList = false;
         var dirList = false;
@@ -34,8 +28,8 @@ module.exports = function (app) {
             return -1;
         }
 
-        if(container){
-            blobsvc.listBlobsSegmentedWithPrefix(container, directory, null, { delimiter: '/' }, function (error, result) {
+        if(blob.container){
+            blobsvc.listBlobsSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
                 if (error) {
                     requestError = error;
                 }
@@ -76,7 +70,7 @@ module.exports = function (app) {
                 }
             });
 
-            blobsvc.listBlobDirectoriesSegmentedWithPrefix(container, directory, null, { delimiter: '/' }, function (error, result) {
+            blobsvc.listBlobDirectoriesSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
                 if (error) {
                     requestError = error;
                 }
@@ -139,19 +133,13 @@ module.exports = function (app) {
 
     app.get('/blob/file/*', function (req, res) {
         var blobPath = req.path.substr('/blob/file'.length);
-        var index = blobPath.indexOf('/', 1);
-        var container = null;
-        var blob = null;
+        var blob = parseBlobPath(blobPath);
+        var filename = blob.blob;
+        index = blob.blob.lastIndexOf('/');
         if (index > 0) {
-            container = blobPath.substring(1, index);
-            blob = blobPath.substring(index + 1);
+            filename = blob.blob.substring(index + 1);
         }
-        var filename = blob;
-        index = blob.lastIndexOf('/');
-        if (index > 0) {
-            filename = blob.substring(index + 1);
-        }
-        if (container && blob && filename) {
+        if (blob.container && blob.blob && filename) {
             var dir = path.resolve(__dirname, new Date().getTime().toString());
             filename = path.resolve(dir , filename);
             console.log(filename);
@@ -161,7 +149,7 @@ module.exports = function (app) {
                 }
                 else {
                     var blobsvc = common.getBlobService(req);
-                    blobsvc.getBlobToLocalFile(container, blob, filename, function (error, serverBlob) {
+                    blobsvc.getBlobToLocalFile(blob.container, blob.blob, filename, function (error, serverBlob) {
                         if (error) {
                             res.status(500).send(error);
                             fs.exists(filename, function (exists) {
@@ -191,4 +179,48 @@ module.exports = function (app) {
             res.status(500).send("wrong blob path");
         }
     });
+
+    app.post('/blob/upload', function (req, res) {
+        var path = req.body.targetPath;
+        var blob = parseBlobPath(path);
+        if (blob.container && blob.blob) {
+            if (req.files && req.files.file) {
+                var blobsvc = common.getBlobService(req);
+                blobsvc.createBlockBlobFromLocalFile(blob.container, blob.blob, req.files.file.path, function (error, result, response) {
+                    if (error) {
+                        res.status(500).send(error);
+                    }
+                    else {
+                        res.send("success");
+                    }
+                    fs.unlink(req.files.file.path);
+                });
+            }
+            else {
+                res.status(500).send("cannot find file");
+            }
+        }
+        else {
+            res.status(500).send("blob path is not valid : " + path);
+        }
+    });
 };
+
+
+function parseBlobPath(path) {
+    var index = path.indexOf('/', 1);
+    var container = null;
+    var blob = null;
+    if (index > 0) {
+        container = path.substring(1, index);
+        blob = path.substring(index + 1);
+    }
+    else if (path.length > 1) {
+        container = path.substring(1);
+    }
+
+    return {
+        container: container,
+        blob:blob
+    }
+}

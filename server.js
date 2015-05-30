@@ -9,6 +9,7 @@ var ip = process.env.IP || "0.0.0.0";
 
 var express = require('express');
 var cookieParser = require('cookie-parser');
+var multer = require('multer'); 
 var path = require('path');
 var app  = express();
 
@@ -29,6 +30,7 @@ else if(fs.existsSync('https-key.pem') && fs.existsSync('https-cert.pem')){
 
 app.use(express.static(path.resolve(__dirname, 'client')));
 app.use(cookieParser());
+app.use(multer({ dest: './uploads/' }));
 table(app);
 blob(app);
 
