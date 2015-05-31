@@ -176,7 +176,7 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                     if (job.onCompleted) {
                         job.onCompleted(job);
                     }
-
+                    jobCount--;
                     scheduleJob();
                 }
             }
@@ -226,5 +226,12 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                 scheduleJob();
                 return job
             },
+            
+            retryJob:function(job){
+                job.status = 'pending';
+                jobs.push(job);
+                scheduleJob();
+                return job;
+            }
         }
     }])

@@ -22,7 +22,7 @@
                     <button class="btn btn-primary">
                         New Folder
                     </button>
-                    <button class="btn btn-primary" onclick="$(this).next().click()">Upload Files...</button>
+                    <button class="btn btn-primary" onclick="$(this).next().click()" ng-disabled="path == '/'">Upload Files...</button>
                     <input type="file" multiple style="display:none" file-selected="fileSelected(files)"/>
                 </div>
                 
@@ -38,21 +38,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="upload in uploadingList">
+                    <tr ng-repeat="upload in uploadingList" ng-show="upload.path == path">
                         <td><img style="max-height:25px; max-width:25px" src="{{getIcon(upload)}}" /></td>
                         <td>
                             {{upload.shortName}}
-                            <!---->
-                            <label ng-hide="upload.status == 'inProgress'" ng-class="{label:1, 'label-success':upload.status =='succeed', 'label-danger':upload.status =='failed', 'label-default':upload.status =='pending'}">
-                                {{upload.status}} upload
+                            
+                            <label class="label label-default" ng-show="upload.status == 'pending'">
+                                pending upload
                             </label>
+                            
+                            <span ng-show="upload.status == 'failed'">
+                                 <label class="label label-danger">
+                                    failed upload
+                                </label>
+                                &nbsp;
+                                <a href="javascript:void(0)" ng-click="retryUpload(upload)">Retry</a>
+                                &nbsp;
+                                <a  href="javascript:void(0)" ng-click="cancelUpload(upload)">Cancel</a>
+                            </span>
+                            
                             <div class="progress" ng-show="upload.status =='inProgress'">
                                 <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{upload.uploadPercentage}}" aria-valuemin="0" aria-valuemax="100" style="width:{{upload.uploadPercentage}}%">
-                                    <span class="sr-only">{{upload.uploadPercentage}}% Complete</span>
+                                    {{upload.uploadPercentage}}%
                                 </div>
                             </div>
                         </td>
-                        <td>N/A</td>
+                        <td>{{upload.properties['last-modified']}}</td>
                         <td>{{getSize(upload)}}</td>
                     </tr>
                     <tr ng-repeat="item in items">

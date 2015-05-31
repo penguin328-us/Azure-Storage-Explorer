@@ -292,13 +292,26 @@
                 $scope.$apply();
             }
             job.onCompleted = function () {
-                $scope.$apply();
+                if(job.status === 'succeed')
+                {
+                    var index = $scope.uploadingList.indexOf(job);
+                    if(index >=0 ){
+                        $scope.uploadingList.splice(index,1);
+                        $scope.items.unshift(job);
+                    }
+                }
+                if(job.path === $scope.path)
+                {
+                    $scope.$apply();
+                }
             }
             
             job.shortName = file.name;
             job.properties = {};
             job.properties['content-length'] = file.size;
+            job.properties['last-modified'] = 'N/A';
             job.type = 1;
+            job.path = $scope.path;
             $scope.uploadingList.push(job);
         }
 
@@ -312,6 +325,17 @@
                 else {
                     uploadFile(files[i]);
                 }
+            }
+        }
+        
+        $scope.retryUpload = function(upload){
+            fileUploads.retryJob(upload);
+        }
+        
+        $scope.cancelUpload = function(upload){
+            var index = $scope.uploadingList.indexOf(upload);
+            if(index >= 0){
+                $scope.uploadingList.splice(index,1);
             }
         }
     }])
