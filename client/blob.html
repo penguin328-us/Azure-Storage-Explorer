@@ -69,8 +69,8 @@
                     <tr ng-repeat="item in items">
                         <td><img style="max-height:25px; max-width:25px" src="{{getIcon(item)}}" /></td>
                         <td ng-click="openItem(item)"><a href="javascript:void(0)">{{item.shortName}}</a></td>
-                        <td>{{item.properties['last-modified']}}</td>
-                        <td>{{getSize(item)}}</td>
+                        <td  class="hidden-xs">{{item.properties['last-modified']}}</td>
+                        <td  class="hidden-xs">{{getSize(item)}}</td>
                     </tr>
                 </tbody>
             </table>
