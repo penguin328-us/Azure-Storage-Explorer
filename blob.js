@@ -13,129 +13,43 @@ module.exports = function (app) {
         var blobsvc = common.getBlobService(req);
         var path = req.query.path || '/';
         var blob = parseBlobPath(path);
-        
-        var blobList = false;
-        var dirList = false;
-        var requestError = null;
-        var data = [];
-        
-        function findEntry(shortName) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i].shortName == shortName) {
-                    return i;
-                }
-            }
-            return -1;
+        listBlobItems(blobsvc,blob,function(data){
+            res.send(data);
+        }, function(error){
+            res.status(500).send(error);
         }
-
+        );
+    });
+    
+    app.get('/blob/newfolder', function(req,res){
+        var blobsvc = common.getBlobService(req);
+        var path = req.query.path || '/';
+        var blob = parseBlobPath(path);
         if(blob.container){
-            blobsvc.listBlobsSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
-                if (error) {
-                    requestError = error;
-                }
-                else {
-                    var tempData = result.entries;
-                    if(tempData && tempData.length){
-                        for(var i=0;i< tempData.length;i++){
-                            var index = tempData[i].name.lastIndexOf('/');
-                            if(index >0){
-                                tempData[i].shortName = tempData[i].name.substr(index+1);
-                            }
-                            else{
-                                tempData[i].shortName = tempData[i].name;
-                            }
-                            tempData[i].type = tempData[i].properties['content-length'] == 0 ? fileType.folder :fileType.file;
-                            
-                            var index = findEntry(tempData[i].shortName);
-                            if (index >= 0) {
-                                data[index] = tempData[i];
-                            }
-                            else {
-                                data.push(tempData[i]);
-                            }
-                        }
-                    }
-                }
-                blobList = true;
-
-                if (blobList && dirList) {
-                    if (requestError) {
-                        console.log(requestError);
-                        res.status(500).send(requestError);
-                    }
-                    else {
-                        console.log(data);
-                        res.send(data);
-                    }
-                }
-            });
-
-            blobsvc.listBlobDirectoriesSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
-                if (error) {
-                    requestError = error;
-                }
-                else {
-                    var tempData = result.entries;
-                    if (tempData && tempData.length) {
-                        for (var i = 0; i < tempData.length; i++) {
-                            var name = tempData[i].name.substr(0, tempData[i].name.length - 1);
-                            var index = name.lastIndexOf('/');
-                            if (index > 0) {
-                                tempData[i].shortName = name.substr(index + 1);
-                            }
-                            else {
-                                tempData[i].shortName = name;
-                            }
-                            tempData[i].type = fileType.folder;
-                            tempData[i].properties = {};
-                            var index = findEntry(tempData[i].shortName);
-                            if (index < 0) {
-                                data.push(tempData[i]);
-                            }
-                        }
-                    }
-                }
-
-                dirList = true;
-                if (blobList && dirList) {
-                    if (requestError) {
-                        console.log(requestError);
-                        res.status(500).send(requestError);
-                    }
-                    else {
-                        console.log(data);
-                        res.send(data);
-                    }
-                }
-            });
-        }
-        else
-        {
-            blobsvc.listContainersSegmented(null, function (error, result) {
-                if (error) {
-                    console.log(error);
+            blobsvc.createContainerIfNotExists(blob.container, function(error, result){
+                if(error){
                     res.status(500).send(error);
                 }
-                else {
-                    console.log(result.entries);
-                    var data = result.entries;
-                    if(data && data.length){
-                        for(var i=0;i<data.length;i++){
-                            data[i].shortName = data[i].name;
-                            data[i].type = fileType.folder;
-                        }
+                else{
+                    listBlobItems(blobsvc,blob,function(data){
+                        res.send(data);
+                    }, function(err){
+                        res.status(500).send(err);
                     }
-                    res.send(data);
+                    );
                 }
-            });
+            })
         }
-    });
+        else{
+            res.status(500).send("wrong file path");
+        }
+    })
 
     app.get('/blob/file/*', function (req, res) {
         var blobPath = req.path.substr('/blob/file'.length);
         var blob = parseBlobPath(blobPath);
         var filename = blob.blob;
-        index = blob.blob.lastIndexOf('/');
+        var index = blob.blob.lastIndexOf('/');
         if (index > 0) {
             filename = blob.blob.substring(index + 1);
         }
@@ -222,5 +136,130 @@ function parseBlobPath(path) {
     return {
         container: container,
         blob:blob
+    }
+}
+
+function listBlobItems(blobsvc, blob, successCallback, errorCallback){
+    var blobList = false;
+    var dirList = false;
+    var requestError = null;
+    var data = [];
+        
+    function findEntry(shortName) {
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].shortName == shortName) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    if(blob.container){
+        blobsvc.listBlobsSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
+            if (error) {
+                requestError = error;
+            }
+            else {
+                var tempData = result.entries;
+                if(tempData && tempData.length){
+                    for(var i=0;i< tempData.length;i++){
+                        var index = tempData[i].name.lastIndexOf('/');
+                        if(index >0){
+                            tempData[i].shortName = tempData[i].name.substr(index+1);
+                        }
+                        else{
+                            tempData[i].shortName = tempData[i].name;
+                        }
+                        tempData[i].type = tempData[i].properties['content-length'] == 0 ? fileType.folder :fileType.file;
+                            
+                        var index = findEntry(tempData[i].shortName);
+                        if (index >= 0) {
+                            data[index] = tempData[i];
+                        }
+                        else {
+                            data.push(tempData[i]);
+                        }
+                    }
+                }
+            }
+            blobList = true;
+
+            if (blobList && dirList) {
+                if (requestError) {
+                    if(errorCallback){
+                        errorCallback(requestError);
+                    }
+                }
+                else {
+                    if(successCallback){
+                        successCallback(data);
+                    }
+                }
+            }
+        });
+
+        blobsvc.listBlobDirectoriesSegmentedWithPrefix(blob.container, blob.blob, null, { delimiter: '/' }, function (error, result) {
+            if (error) {
+                requestError = error;
+            }
+            else {
+                var tempData = result.entries;
+                if (tempData && tempData.length) {
+                    for (var i = 0; i < tempData.length; i++) {
+                        var name = tempData[i].name.substr(0, tempData[i].name.length - 1);
+                        var index = name.lastIndexOf('/');
+                        if (index > 0) {
+                            tempData[i].shortName = name.substr(index + 1);
+                        }
+                        else {
+                            tempData[i].shortName = name;
+                        }
+                        tempData[i].type = fileType.folder;
+                        tempData[i].properties = {};
+                        var index = findEntry(tempData[i].shortName);
+                        if (index < 0) {
+                            data.push(tempData[i]);
+                        }
+                    }
+                }
+            }
+
+            dirList = true;
+            if (blobList && dirList) {
+                if (requestError) {
+                    if(errorCallback){
+                        errorCallback(requestError);
+                    }
+                }
+                else {
+                    if(successCallback){
+                        successCallback(data);
+                    }
+                }
+            }
+        });
+    }
+    else
+    {
+        blobsvc.listContainersSegmented(null, function (error, result) {
+            if (error) {
+                if(errorCallback){
+                    errorCallback(error);
+                }
+            }
+            else {
+                console.log(result.entries);
+                var data = result.entries;
+                if(data && data.length){
+                    for(var i=0;i<data.length;i++){
+                        data[i].shortName = data[i].name;
+                        data[i].type = fileType.folder;
+                    }
+                }
+                if(successCallback){
+                    successCallback(data);
+                }
+            }
+        });
     }
 }

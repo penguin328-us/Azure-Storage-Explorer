@@ -138,6 +138,15 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                 },
                 params:{path : path}
             });
+            },
+            newFolder:function(sa, path){
+                return $http.get('/blob/newfolder', {
+                headers: {
+                    'x-storage-account-name': sa.name,
+                    'x-storage-account-key': sa.key
+                },
+                params:{path : path}
+            });
             }
         }
     }])

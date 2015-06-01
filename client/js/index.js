@@ -184,6 +184,7 @@
         $scope.items = [];
         $scope.itemsLoading = true;
         $scope.uploadingList = [];
+        $scope.newFolderName = "";
         
         function load(){
             updatePathList();
@@ -336,6 +337,30 @@
             var index = $scope.uploadingList.indexOf(upload);
             if(index >= 0){
                 $scope.uploadingList.splice(index,1);
+            }
+        }
+        
+        $scope.newFolder = function(){
+            if($scope.newFolderName){
+                var oldPath = $scope.path;
+                $scope.path = $scope.path + $scope.newFolderName + '/';
+                $scope.newFolderName = '';
+                
+                updatePathList();
+                $scope.itemsLoading = true;
+                accountMgmt.saveBlobContext({
+                    path: $scope.path
+                });
+                blobMgmt.newFolder($scope.currentAccount, $scope.path)
+                .success(function (data, status) { 
+                    $scope.items = data; 
+                })
+                .error(function (data, status) { 
+                    console.log(data); 
+                    $scope.path = oldPath;
+                    updatePathList();
+                })
+                .finally(function () { $scope.itemsLoading = false; });
             }
         }
     }])
