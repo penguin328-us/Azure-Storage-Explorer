@@ -27,28 +27,29 @@
 
     <div class="loading" style="min-height:100px" ng-show="entitiesLoading"></div>
     <div ng-hide="entitiesLoading">
-        <div ng-show="entities && entities.length > 0" id="table-entries">
-            <div class="row">
-                <div class="col-sm-6">
-                   <div class="input-group">
-                      <input type="text" class="form-control" ng-model="tableQuery" placeholder="Search...">
-                      <span class="input-group-btn">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" ng-model="tableQuery" placeholder="Search...">
+                    <span class="input-group-btn">
                         <button class="btn btn-default" type="button" ng-click="search()">Go!</button>
-                      </span>
-                    </div><!-- /input-group -->
+                    </span>
                 </div>
-                <div class="col-sm-6">
-                    <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
-                        Column Filter
-                    </button>
-
-                    <div class="pull-right">
-                        <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntries(false)">Next Page</button>
-                    </div>
-                </div>
-                
+                <!-- /input-group -->
             </div>
-            <hr />
+            <div class="col-sm-6" ng-show="entities && entities.length > 0">
+                <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
+                    Column Filter
+                </button>
+
+                <div class="pull-right">
+                    <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntries(false)">Next Page</button>
+                </div>
+            </div>
+
+        </div>
+        <hr />
+        <div ng-show="entities && entities.length > 0" id="table-entries">
             <table class="resizeTable table table-condensed">
                 <thead>
                     <tr>
