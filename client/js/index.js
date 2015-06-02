@@ -90,9 +90,9 @@
             .success(function (data, status) {
                 $scope.next = data.next;
                 $scope.entities = data.entries;
-                if (data && data.length > 0 && isTableChanged) {
+                if (data.entries && data.entries.length > 0 && isTableChanged) {
                     $scope.selectedTableCols = [];
-                    for (var name in data[0]) {
+                    for (var name in data.entries[0]) {
                         $scope.selectedTableCols.push(name);
                     }
                     initColumnFilterPopup($scope.selectedTableCols);
