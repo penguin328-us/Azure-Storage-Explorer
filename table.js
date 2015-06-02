@@ -18,8 +18,20 @@ module.exports = function (app) {
     app.get('/table/listentities/:table', function(req,res){
         var tablesvc = common.getTableService(req);
         var table = req.params.table;
+        var count = req.query.count || 100;
+        var where = req.query.query || null;
+        var token = req.query.next || null;
+        if (token) {
+            token = JSON.parse(token);
+        }
+
         var query = new azure.TableQuery();
-        tablesvc.queryEntities(table,query,null, function (error, result) {
+        query.top(count);
+        if (where) {
+            query._where.push(where); 
+        }
+
+        tablesvc.queryEntities(table,query,token, function (error, result) {
             if (error) {
                 console.log(error);
                 res.status(500).send(error);
@@ -36,7 +48,11 @@ module.exports = function (app) {
                         entries.push(entry);
                     }
                 }
-                res.send(entries);
+                var data = {
+                    next : result.continuationToken,
+                    entries: entries
+                };
+                res.send(data);
             }
         });
     });

@@ -110,12 +110,13 @@ angular.module('azureStorageMgmt', ['ngCookies'])
         }
     }])
     .factory('tableMgmt', ['$http', function($http){
-        function callTableService(sa, url){
+        function callTableService(sa, url, params){
             return $http.get(url, {
                 headers: {
                     'x-storage-account-name': sa.name,
                     'x-storage-account-key': sa.key
-                }
+                },
+                params: params
             });
         }
         return {
@@ -123,8 +124,12 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                 return callTableService(sa,'/table/list');
             },
             
-            getEntities:function(sa,table){
-                return callTableService(sa,'/table/listentities/' + table);
+            getEntities:function(sa,table, count, next, query){
+                return callTableService(sa, '/table/listentities/' + table, {
+                    count: count,
+                    query: query,
+                    next: next
+                });
             }
         }
     }])

@@ -75,18 +75,21 @@
         $scope.tables = [];
         $scope.currentTable = "";
         
+        var count = 100;
         $scope.entitiesLoading = false;
+        $scope.next = null
         $scope.entities = [];
         $scope.selectedTableCols = [];
         $scope.tableQuery = "";
         
         var tableColFilterContent = "";
 
-        function loadEntries(isTableChanged){
+        $scope.loadEntries = function (isTableChanged){
             $scope.entitiesLoading = true;
-            tableMgmt.getEntities($scope.currentAccount, $scope.currentTable)
+            tableMgmt.getEntities($scope.currentAccount, $scope.currentTable, count, $scope.next, $scope.tableQuery)
             .success(function (data, status) {
-                $scope.entities = data;
+                $scope.next = data.next;
+                $scope.entities = data.entries;
                 if (data && data.length > 0 && isTableChanged) {
                     $scope.selectedTableCols = [];
                     for (var name in data[0]) {
@@ -96,7 +99,8 @@
                     accountMgmt.saveTableContext({
                         table:$scope.currentTable,
                         cols:$scope.selectedTableCols,
-                        selectedCols:$scope.selectedTableCols,
+                        selectedCols: $scope.selectedTableCols,
+                        query: $scope.tableQuery
                     })
                 }
             })
@@ -122,7 +126,8 @@
         }
             
         $scope.tableChange = function (){
-           loadEntries(true);
+            $scope.next = null;
+            $scope.loadEntries(true);
         }
         
         $scope.setFilter = function($event){
@@ -142,6 +147,16 @@
             }
         }
         
+        $scope.search = function () {
+            $scope.next = null;
+            var ctx = accountMgmt.getTableContext();
+            if (ctx) {
+                ctx.query = $scope.tableQuery;
+                accountMgmt.saveTableContext(ctx);
+            }
+            $scope.loadEntries(false);
+        }
+
         if ($scope.currentAccount && $scope.currentAccount.name) {
             $scope.tableLoading = true;
             tableMgmt.listTables($scope.currentAccount)
@@ -174,7 +189,7 @@
                     }
                 }
             }
-            loadEntries(isTableChanged);
+            $scope.loadEntries(isTableChanged);
         }
     }])
     .controller('BlobController', ['accountMgmt', 'blobMgmt', 'fileUploads', '$scope', '$compile', function (accountMgmt, blobMgmt, fileUploads, $scope, $compile) {
