@@ -1,4 +1,4 @@
-﻿angular.module('mainApp', ['ngRoute', 'azureStorageMgmt'])
+angular.module('mainApp', ['ngRoute', 'azureStorageMgmt'])
     .config(function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -80,26 +80,34 @@
         $scope.next = null
         $scope.entities = [];
         $scope.selectedTableCols = [];
+        $scope.tableCols = [];
         $scope.tableQuery = "";
+        $scope.entityCheckAll = false;
+        $scope.colsCheckAll = false;
         
         var tableColFilterContent = "";
 
         $scope.loadEntries = function (isTableChanged){
             $scope.entitiesLoading = true;
+            $scope.entityCheckAll = false;
             tableMgmt.getEntities($scope.currentAccount, $scope.currentTable, count, $scope.next, $scope.tableQuery)
             .success(function (data, status) {
                 $scope.next = data.next;
                 $scope.entities = data.entries;
                 if (data.entries && data.entries.length > 0 && isTableChanged) {
                     $scope.selectedTableCols = [];
+                    $scope.tableCols = [];
                     for (var name in data.entries[0]) {
                         $scope.selectedTableCols.push(name);
+                        $scope.tableCols.push({
+                            name:name,
+                            selected:true
+                        })
                     }
-                    initColumnFilterPopup($scope.selectedTableCols);
+                    $scope.colsCheckAll = true;
                     accountMgmt.saveTableContext({
                         table:$scope.currentTable,
-                        cols:$scope.selectedTableCols,
-                        selectedCols: $scope.selectedTableCols,
+                        tableCols:$scope.tableCols,
                         query: $scope.tableQuery
                     })
                 }
@@ -109,20 +117,17 @@
         }
         
         function initColumnFilterPopup(cols){
-            var content = '<form>';
-                    for (var i = 0; i < cols.length; i++) {
-                        content = content + '<div class="checkbox"><label><input ' + ($scope.selectedTableCols.indexOf(cols[i])>=0?'checked':'') + ' type="checkbox" value="' + cols[i] + '">' + cols[i] + '</label></div>';
-                    }
-                    content =content + '<button class="btn btn-primary" ng-click="setFilter($event)"> OK </button>  <button class="btn btn-default" onclick="$(\'#table-column-filter\').popover(\'hide\');">Cancel</button></form>';
-                    tableColFilterContent = $compile(content)($scope);
+            var content = '<div class="checkbox"><label><input type="checkbox" ng-click="checkAllCols()" ng-model="colsCheckAll"/>#Check All</label></div><form>';
+
+            content = content + '<div class="checkbox" ng-repeat="col in tableCols"><label><input ng-model="col.selected" type="checkbox" value="{{col.name}}">{{col.name}}</label></div>';
+            content = content + '<button class="btn btn-primary" ng-click="setFilter($event)"> OK </button>  <button class="btn btn-default" onclick="$(\'#table-column-filter\').popover(\'hide\');">Cancel</button></form>';
+            tableColFilterContent = $compile(content)($scope);
                     
-                    $("#table-column-filter").popover({
-                        html: true,
-                        content: function() {
-                            return tableColFilterContent;
-                        },
-                        container:'#table-entries'
-                    });
+            $("#table-column-filter").popover({
+                html: true,
+                content:  tableColFilterContent,
+                container:'#table-entries'
+            });
         }
             
         $scope.tableChange = function (){
@@ -130,13 +135,23 @@
             $scope.loadEntries(true);
         }
         
-        $scope.setFilter = function($event){
-            var cols = []
-            $($event.target).parent().find("input:checked").each(function(){cols.push($(this).val());});
+        $scope.checkAllCols = function(){
+            for(var i=0;i<$scope.tableCols.length;i++){
+                $scope.tableCols[i].selected = $scope.colsCheckAll;
+            }
+        }
+        
+        $scope.setFilter = function(){
+            var cols = [];
+            for(var i=0;i<$scope.tableCols.length;i++){
+                if($scope.tableCols[i].selected){
+                    cols.push($scope.tableCols[i].name);
+                }
+            }
             if(cols.length>0){
                 var ctx = accountMgmt.getTableContext();
                 if(ctx){
-                    ctx.selectedCols = cols;
+                    ctx.tableCols = $scope.tableCols;
                     accountMgmt.saveTableContext(ctx);
                 }
                 $scope.selectedTableCols = cols;
@@ -157,6 +172,32 @@
             $scope.loadEntries(false);
         }
 
+        $scope.checkAllEntities = function(){
+            for(var i=0; i < $scope.entities.length;i++){
+                $scope.entities[i].$selected = $scope.entityCheckAll
+            }
+        }
+        
+        $scope.hasAnyEntryChecked = function(){
+            for(var i=0;i<$scope.entities.length;i++){
+                if($scope.entities[i].$selected){
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        $scope.deleteEntries = function(){
+            var toBeDeletedEntities = []
+            for(var i=0;i<$scope.entities.length;i++){
+                if($scope.entities[i].$selected){
+                    toBeDeletedEntities.push($scope.entities[i]);
+                }
+            }
+            
+            alert("coming soon...");
+        }
+
         if ($scope.currentAccount && $scope.currentAccount.name) {
             $scope.tableLoading = true;
             tableMgmt.listTables($scope.currentAccount)
@@ -165,6 +206,7 @@
                 if(data && data.length>0) {
                     var ctx = accountMgmt.getTableContext();
                     $scope.currentTable = data[0];
+                    initColumnFilterPopup();
                     applyContext(ctx);
                 }})
             .error(function (data, status) { console.log(data); })
@@ -175,15 +217,14 @@
             var isTableChanged = true;
             if(ctx && ctx.table){
                 $scope.currentTable = ctx.table;
-                if(ctx.cols && ctx.cols.length > 0){
+                if(ctx.tableCols && ctx.tableCols.length > 0){
                     isTableChanged = false;
-                    if(ctx.selectedCols && ctx.selectedCols.length >0){
-                        $scope.selectedTableCols = ctx.selectedCols;
+                    $scope.tableCols = ctx.tableCols;
+                    for(var i=0;i<$scope.tableCols.length;i++){
+                        if($scope.tableCols[i].selected){
+                            $scope.selectedTableCols.push($scope.tableCols[i].name);
+                        }
                     }
-                    else{
-                        $scope.selectedTableCols = ctx.cols;
-                    }
-                    initColumnFilterPopup(ctx.cols);
                     if(ctx.query){
                         $scope.tableQuery = ctx.query;
                     }
@@ -378,4 +419,5 @@
                 .finally(function () { $scope.itemsLoading = false; });
             }
         }
+        
     }])

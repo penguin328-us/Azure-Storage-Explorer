@@ -18,7 +18,3 @@ table.resizeTable {
     word-wrap:break-word;
     text-overflow:ellipsis;
 }
-
-    table.resizeTable th {
-        min-width:100px;
-    }

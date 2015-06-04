@@ -41,7 +41,9 @@
                 <button id="table-column-filter" type="button" class="btn btn-primary" data-container="body" data-toggle="popover" data-placement="bottom">
                     Column Filter
                 </button>
-
+                
+                <button class="btn btn-default" ng-click="deleteEntries()" ng-disabled="!hasAnyEntryChecked()">Delete Selected Entities</button>
+                
                 <div class="pull-right">
                     <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntries(false)">Next Page</button>
                 </div>
@@ -53,11 +55,13 @@
             <table class="resizeTable table table-condensed">
                 <thead>
                     <tr>
-                        <th ng-repeat="col in selectedTableCols">{{col}}</th>
+                        <th style="width:20px;"><input type="checkbox" ng-model="entityCheckAll" ng-click="checkAllEntities()" /></th>
+                        <th style="min-width:100px;" ng-repeat="col in selectedTableCols">{{col}}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="entity in entities">
+                        <td><input type="checkbox" ng-model="entity.$selected"/></td>
                         <td ng-repeat="col in selectedTableCols">{{entity[col]}}
                         </td>
                     </tr>
