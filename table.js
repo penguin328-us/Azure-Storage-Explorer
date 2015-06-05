@@ -56,4 +56,29 @@ module.exports = function (app) {
             }
         });
     });
+    
+    app.get('/table/deleteEntity/:table', function(req,res){
+        var table = req.params.table;
+        var PartitionKey = req.query.PartitionKey || null;
+        var RowKey = req.query.RowKey || null;
+        if(table && PartitionKey && RowKey){
+            var tablesvc = common.getTableService(req);
+            var entGen = azure.TableUtilities.entityGenerator;
+            var entity = {
+              PartitionKey: entGen.String(PartitionKey),
+              RowKey: entGen.String(RowKey),
+            }
+            tablesvc.deleteEntity(table, entity, function(error,result){
+                if(error){
+                    res.status(500).send(error);
+                }
+                else{
+                    res.send("success");
+                }
+            })
+        }
+        else{
+            res.status(500).send("wrong paramters");
+        }
+    });
 };

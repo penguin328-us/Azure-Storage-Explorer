@@ -85,6 +85,13 @@ angular.module('mainApp', ['ngRoute', 'azureStorageMgmt'])
         $scope.entityCheckAll = false;
         $scope.colsCheckAll = false;
         
+        $scope.deletingEntity = {};
+        $scope.deletingError = "";
+        $scope.deletingPercentage = 0.0;
+        
+        var toBeDeletedEntities = [];
+        var toBeDeletedEntitiesCount = 0;
+        
         var tableColFilterContent = "";
 
         $scope.loadEntries = function (isTableChanged){
@@ -188,14 +195,50 @@ angular.module('mainApp', ['ngRoute', 'azureStorageMgmt'])
         }
         
         $scope.deleteEntries = function(){
-            var toBeDeletedEntities = []
+            toBeDeletedEntities = [];
+            $scope.deletingError = "";
             for(var i=0;i<$scope.entities.length;i++){
                 if($scope.entities[i].$selected){
                     toBeDeletedEntities.push($scope.entities[i]);
                 }
             }
-            
-            alert("coming soon...");
+            toBeDeletedEntitiesCount = toBeDeletedEntities.length;
+            if(toBeDeletedEntitiesCount > 0)
+            {
+                if(confirm("Are you sure to delete those entities?")){
+                    $scope.continueDeleting();
+                    $("#divDeletingDlg").modal('show');
+                }
+            }
+            else{
+                alert("Please Select at least one entity");
+            }
+        }
+        
+        
+        $scope.continueDeleting = function(){
+            $scope.deletingPercentage = Math.floor((toBeDeletedEntitiesCount - toBeDeletedEntities.length) / toBeDeletedEntitiesCount * 1000) / 10;
+            if(toBeDeletedEntities.length > 0){
+                $scope.deletingEntity = toBeDeletedEntities.shift();
+                $scope.deletingCurrentEntity();
+            }
+            else{
+                $("#divDeletingDlg").modal('hide');
+                $scope.next = null;
+                $scope.loadEntries(false);
+            }
+        }
+        
+        $scope.deletingCurrentEntity = function(){
+            $scope.deletingError = "";
+            tableMgmt.deleteEntity($scope.currentAccount, $scope.currentTable, $scope.deletingEntity)
+            .success(function(data){ $scope.continueDeleting(); })
+            .error(function(error){$scope.deletingError = error;})
+        }
+        
+        $scope.cancelDeleting = function(){
+            $("#divDeletingDlg").modal('hide');
+            $scope.loadEntries(false);
         }
 
         if ($scope.currentAccount && $scope.currentAccount.name) {

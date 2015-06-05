@@ -74,3 +74,34 @@
         <div class="alert alert-info" ng-hide="entities && entities.length > 0">No Entities in Current Table</div>
     </div>
 </div>
+
+<div id="divDeletingDlg" class="modal fade" data-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Table Entities</h4>
+      </div>
+      <div class="modal-body">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{deletingPercentage}}" aria-valuemin="0" aria-valuemax="100" style="min-width:4em; width: {{deletingPercentage}}%">
+            {{deletingPercentage}}%
+          </div>
+        </div>
+        Deleting Entity
+        <div style="padding-left:10px;">
+            PartitionKey: {{deletingEntity.PartitionKey}}
+            <br />
+            RowKey: {{deletingEntity.RowKey}}
+        </div>
+        
+        <div class="alert alert-danger" ng-show="deletingError">{{deletingError}}</div>
+            
+      </div>
+      <div class="modal-footer" ng-show="deletingError">
+        <button type="button" class="btn btn-primary" ng-click="continueDeleting()">Ignore</button>
+        <button type="button" class="btn btn-primary" ng-click="deletingCurrentEntity()">Retry</button>
+        <button type="button" class="btn btn-default" ng-click="cancelDeleting()">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

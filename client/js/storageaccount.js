@@ -130,6 +130,12 @@ angular.module('azureStorageMgmt', ['ngCookies'])
                     query: query,
                     next: next
                 });
+            },
+            deleteEntity:function(sa, table, entity){
+                return callTableService(sa, '/table/deleteEntity/' + table, {
+                    PartitionKey: entity.PartitionKey,
+                    RowKey:entity.RowKey,
+                });
             }
         }
     }])
