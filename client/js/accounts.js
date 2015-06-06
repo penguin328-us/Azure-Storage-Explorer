@@ -31,8 +31,7 @@ angular.module('mainApp')
             if (account && account.name && account.key) {
                 $cookies.accountName = account.name;
                 $cookies.accountKey = account.key;
-            }
-            else {
+            }else {
                 $cookieStore.remove('accountName');
                 $cookieStore.remove('accountKey');
             }
