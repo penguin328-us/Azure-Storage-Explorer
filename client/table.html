@@ -45,7 +45,7 @@
                 <button class="btn btn-default" ng-click="deleteEntries()" ng-disabled="!hasAnyEntryChecked()">Delete Entities</button>
                 
                 <div class="pull-right">
-                    <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntries(false)">Next Page</button>
+                    <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntities(false)">Next Page</button>
                 </div>
             </div>
 
@@ -68,7 +68,7 @@
                 </tbody>
             </table>
             <div class="pull-right">
-                <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntries(false)">Next Page</button>
+                <button class="btn btn-primary" ng-show="next != null" ng-click="loadEntities(false)">Next Page</button>
             </div>
         </div>
         <div class="alert alert-info" ng-hide="entities && entities.length > 0">No Entities in Current Table</div>
