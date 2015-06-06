@@ -108,47 +108,17 @@ module.exports = function (app) {
     app.get('/blob/file/*', function (req, res) {
         var blobPath = req.path.substr('/blob/file'.length);
         var blob = parseBlobPath(blobPath);
-        var filename = blob.blob;
-        var index = blob.blob.lastIndexOf('/');
-        if (index > 0) {
-            filename = blob.blob.substring(index + 1);
-        }
-        if (blob.container && blob.blob && filename) {
-            var dir = path.resolve(__dirname, new Date().getTime().toString());
-            filename = path.resolve(dir , filename);
-            console.log(filename);
-            fs.mkdir(dir, function (error) {
-                if (error) {
+        
+        if (blob.container && blob.blob ) {
+            var blobsvc = common.getBlobService(req);
+            var readStream = blobsvc.createReadStream(blob.container,blob.blob, function(error){
+                if(error){
                     res.status(500).send(error);
                 }
-                else {
-                    var blobsvc = common.getBlobService(req);
-                    blobsvc.getBlobToLocalFile(blob.container, blob.blob, filename, function (error, serverBlob) {
-                        if (error) {
-                            res.status(500).send(error);
-                            fs.exists(filename, function (exists) {
-                                if (exists) {
-                                    fs.unlink(filename, function () {
-                                        fs.rmdir(dir);
-                                    });
-                                }
-                                else {
-                                    fs.rmdir(dir);
-                                }
-                                
-                            });
-                        }
-                        else {
-                            res.sendFile(filename, {}, function (err) {
-                                fs.unlink(filename, function () { 
-                                    fs.rmdir(dir);
-                                });
-                            });
-                        }
-                    });
-                    
-                }
             });
+            if(readStream){
+                readStream.pipe(res);
+            }
         } else {
             res.status(500).send("wrong blob path");
         }
@@ -160,15 +130,18 @@ module.exports = function (app) {
         if (blob.container && blob.blob) {
             if (req.files && req.files.file) {
                 var blobsvc = common.getBlobService(req);
-                blobsvc.createBlockBlobFromLocalFile(blob.container, blob.blob, req.files.file.path, function (error, result, response) {
-                    if (error) {
+                
+                var writeStream = blobsvc.createWriteStreamToBlockBlob(blob.container,blob.blob,function(error){
+                    if(error){
                         res.status(500).send(error);
                     }
-                    else {
-                        res.send("success");
-                    }
-                    fs.unlink(req.files.file.path);
                 });
+                if(writeStream){
+                    var readStream = fs.createReadStream(req.files.file.path);
+                    res.send("success");
+                    readStream.pipe(writeStream);
+                    fs.unlink(req.files.file.path);
+                }
             }
             else {
                 res.status(500).send("cannot find file");
