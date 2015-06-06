@@ -24,6 +24,7 @@
                     </button>
                     <button class="btn btn-primary" onclick="$(this).next().click()" ng-disabled="path == '/'">Upload Files...</button>
                     <input type="file" multiple style="display:none" file-selected="fileSelected(files)"/>
+                    <button class="btn btn-default" ng-disabled="!hasAnyItemChecked()" ng-click="deleteBlobs()">Delete Blobs...</button>
                 </div>
                 
             </div>
@@ -31,6 +32,7 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
+                        <th style="width:15px;"><input type="checkbox" ng-model="checkAllItems" ng-click="clickCheckAllItems()"/></th>
                         <th style="width:25px;"></th>
                         <th>Name</th>
                         <th class="hidden-xs">Date modified</th>
@@ -39,6 +41,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="upload in uploadingList" ng-show="upload.path == path">
+                        <td></td>
                         <td><img style="max-height:25px; max-width:25px" src="{{getIcon(upload)}}" /></td>
                         <td>
                             {{upload.shortName}}
@@ -67,6 +70,7 @@
                         <td class="hidden-xs">{{getSize(upload)}}</td>
                     </tr>
                     <tr ng-repeat="item in items">
+                        <td><input type="checkbox" ng-model="item.$selected" /></td>
                         <td><img style="max-height:25px; max-width:25px" src="{{getIcon(item)}}" /></td>
                         <td ng-click="openItem(item)"><a href="javascript:void(0)">{{item.shortName}}</a></td>
                         <td  class="hidden-xs">{{item.properties['last-modified']}}</td>
@@ -92,6 +96,32 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="newFolder()">Confirm</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="divDeletingDlg" class="modal fade" data-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Blobs</h4>
+      </div>
+      <div class="modal-body" style="word-break:break-all">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{deletePercentage}}" aria-valuemin="0" aria-valuemax="100" style="min-width:4em; width: {{deletePercentage}}%">
+            {{deletePercentage}}%
+          </div>
+        </div>
+        {{deleteAction}} : {{deleteActionPath}}
+
+        <div class="alert alert-danger" ng-show="deleteError">{{deleteError}}</div>
+            
+      </div>
+      <div class="modal-footer" ng-show="deleteError">
+        <button type="button" class="btn btn-primary" ng-click="continueDeleting()">Ignore</button>
+        <button type="button" class="btn btn-primary" ng-click="deletingCurrentItem()">Retry</button>
+        <button type="button" class="btn btn-default" ng-click="cancelDeleting()">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

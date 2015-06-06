@@ -143,22 +143,40 @@ angular.module('azureStorageMgmt', ['ngCookies'])
         return {
             listItem:function(sa,path){
                 return $http.get('/blob/list', {
-                headers: {
-                    'x-storage-account-name': sa.name,
-                    'x-storage-account-key': sa.key
-                },
-                params:{path : path}
-            });
+                    headers: {
+                        'x-storage-account-name': sa.name,
+                        'x-storage-account-key': sa.key
+                    },
+                    params:{path : path}
+                });
             },
             newFolder:function(sa, path){
                 return $http.get('/blob/newfolder', {
-                headers: {
-                    'x-storage-account-name': sa.name,
-                    'x-storage-account-key': sa.key
-                },
-                params:{path : path}
-            });
-            }
+                    headers: {
+                        'x-storage-account-name': sa.name,
+                        'x-storage-account-key': sa.key
+                    },
+                    params:{path : path}
+                });
+            },
+            discoverFolderForDelete:function(sa,path){
+                return $http.get('/blob/discoverfolderfordelete', {
+                    headers: {
+                        'x-storage-account-name': sa.name,
+                        'x-storage-account-key': sa.key
+                    },
+                    params:{path : path}
+                });
+            },
+            deleteBlob:function(sa,path){
+                return $http.get('/blob/delete', {
+                    headers: {
+                        'x-storage-account-name': sa.name,
+                        'x-storage-account-key': sa.key
+                    },
+                    params:{path : path}
+                });
+            },
         }
     }])
     .factory('fileUploads', [function () {

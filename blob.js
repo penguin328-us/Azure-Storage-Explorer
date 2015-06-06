@@ -21,6 +21,66 @@ module.exports = function (app) {
         );
     });
     
+    app.get('/blob/discoverfolderfordelete', function(req,res){
+        var blobsvc = common.getBlobService(req);
+        var path = req.query.path || '/';
+        var blob = parseBlobPath(path);
+        if(!blob.blob){
+            res.send({
+                blobs:['/' + blob.container],
+                next:null
+            });
+        }
+        else{
+            blobsvc.listBlobsSegmentedWithPrefix(blob.container, blob.blob, null, function (error, result) {
+            if (error) {
+                res.status(500).send(error);
+            }
+            else {
+                var tempData = result.entries;
+                var blobs = [];
+                if(tempData && tempData.length){
+                    for(var i=0;i< tempData.length;i++){
+                        blobs.push('/' + blob.container + '/' + tempData[i].name);
+                    }
+                }
+                res.send({
+                    blobs:blobs,
+                    next:result.continuationToken
+                });
+            }
+            });
+        }
+    });
+    
+    app.get("/blob/delete", function(req,res){
+        var path = req.query.path || '/';
+        var blobsvc = common.getBlobService(req);
+        var blob = parseBlobPath(path)
+        if(blob.container && !blob.blob){
+            blobsvc.deleteContainerIfExists(blob.container, function(error, result){
+                if(error){
+                    res.status(500).send(error);
+                }
+                else{
+                    res.send("success");
+                }
+            });
+        }
+        else if(blob.container && blob.blob){
+            blobsvc.deleteBlobIfExists(blob.container, blob.blob, function(error, result){
+                if(error){
+                    res.status(500).send(error);
+                }
+                else{
+                    res.send("success");
+                }
+            });
+        }else{
+            res.status(500).send("wrong blob path");
+        }
+    });
+    
     app.get('/blob/newfolder', function(req,res){
         var blobsvc = common.getBlobService(req);
         var path = req.query.path || '/';
