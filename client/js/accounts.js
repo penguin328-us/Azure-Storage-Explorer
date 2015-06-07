@@ -3,6 +3,7 @@ angular.module('mainApp')
         var accountsKey = "AzureAccounts";
         var activeAccountKey = "ActiveAzureAccount";
         var tableContextKey = "TableContext";
+        var tableSettingsKey = "TableSettings";
         var blobContextKey = "BlobContext";
 
         var saveToLocal = function (key, value) {
@@ -98,7 +99,15 @@ angular.module('mainApp')
             getTableContext:function(){
                 return loadFromLocal(tableContextKey);
             },
-
+            
+            saveTableSettings:function(settings){
+                saveToLocal(tableSettingsKey, settings);
+            },
+            
+            getTableSettings:function(){
+                return loadFromLocal(tableSettingsKey)
+            },
+            
             saveBlobContext: function (ctx) {
                 saveToLocal(blobContextKey, ctx);
             },
@@ -141,6 +150,13 @@ angular.module('mainApp')
                     $scope.currentAccount = accountMgmt.getCurrentStorageAccount();
                 }
             }
-        }
+        };
+        
+        $scope.tableSettings = accountMgmt.getTableSettings() || {displayCount:100};
+        
+        $scope.updateTableSettings = function(){
+            accountMgmt.saveTableSettings($scope.tableSettings);
+        };
+        
     }])
    

@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     <div class="alert alert-info">Current Storage Account is <strong>{{currentAccount? currentAccount.name : "N/A"}}</strong></div>
 
     <h3>List of Registered Storage Accounts</h3>
@@ -26,4 +26,13 @@
             </tr>
         </tbody>
     </table>
+    
+    <hr />
+    <h4>Azure Table Settings</h4>
+    <form class="form-inline">
+        <div class="form-group">
+            <label class="control-label">Default Entity Count for each loading: </label>
+            <input type="number" class="form-control" ng-model="tableSettings.displayCount" ng-change="updateTableSettings()">
+        </div>
+    </form>
 </div>

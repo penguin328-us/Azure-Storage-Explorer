@@ -35,7 +35,7 @@ angular.module('mainApp')
         $scope.tables = [];
         $scope.currentTable = "";
         
-        var count = 100;
+        var tableSettings = accountMgmt.getTableSettings() || {displayCount:100};
         $scope.entitiesLoading = false;
         $scope.next = null
         $scope.entities = [];
@@ -57,7 +57,7 @@ angular.module('mainApp')
         $scope.loadEntities = function (isTableChanged){
             $scope.entitiesLoading = true;
             $scope.entityCheckAll = false;
-            tableMgmt.getEntities($scope.currentAccount, $scope.currentTable, count, $scope.next, $scope.tableQuery)
+            tableMgmt.getEntities($scope.currentAccount, $scope.currentTable, tableSettings.displayCount, $scope.next, $scope.tableQuery)
             .success(function (data, status) {
                 $scope.next = data.next;
                 $scope.entities = data.entries;
